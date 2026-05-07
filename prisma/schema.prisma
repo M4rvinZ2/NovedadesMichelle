@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Producto {
+  id           Int       @id @default(autoincrement())
+  nombre       String
+  precio       Float
+  stock        Int       @default(0)
+  codigoBarras String?   @unique
+  proveedorId  Int?
+  proveedor    Proveedor? @relation(fields: [proveedorId], references: [id])
+  ventaItems   VentaItem[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Proveedor {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  contacto  String?
+  telefono  String?
+  email     String?
+  productos Producto[]
+  createdAt DateTime   @default(now())
+}
+
+model Empleado {
+  id          Int          @id @default(autoincrement())
+  codigo      String       @unique
+  nombre      String
+  puesto      String?
+  asistencias Asistencia[]
+  createdAt   DateTime     @default(now())
+}
+
+model Asistencia {
+  id         Int       @id @default(autoincrement())
+  empleadoId Int
+  empleado   Empleado  @relation(fields: [empleadoId], references: [id])
+  tipo       String
+  fecha      DateTime  @default(now())
+}
+
+model Venta {
+  id           Int         @id @default(autoincrement())
+  total        Float
+  items        VentaItem[]
+  createdAt    DateTime    @default(now())
+  corteCajaId  Int?
+  corteCaja    CorteCaja?  @relation(fields: [corteCajaId], references: [id])
+}
+
+model CorteCaja {
+  id            Int      @id @default(autoincrement())
+  fecha         DateTime @default(now())
+  totalVentas   Float
+  numeroVentas Int
+  ventas        Venta[]
+}
+
+model VentaItem {
+  id         Int      @id @default(autoincrement())
+  ventaId    Int
+  venta      Venta    @relation(fields: [ventaId], references: [id])
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  cantidad   Int
+  precioUnit Float
+}
