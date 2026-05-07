@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { realizarVenta, realizarCorteCaja } from '@/lib/actions';
+import { realizarVenta } from '@/lib/actions';
 
 export default function CobroClient({ productos }: { productos: Array<{ id: number; nombre: string; precio: number; stock: number }> }) {
   const [cart, setCart] = useState<Array<{ productoId: number; nombre: string; cantidad: number; precioUnit: number }>>([]);

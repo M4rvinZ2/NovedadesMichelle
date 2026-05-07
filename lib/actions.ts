@@ -114,43 +114,6 @@ export async function realizarVenta(formData: FormData) {
   revalidatePath('/');
 }
 
-export async function realizarCorteCaja() {
-  const ventasPendientes = await prisma.venta.findMany({
-    where: { corteCajaId: null }
-  });
-
-  if (ventasPendientes.length === 0) return;
-
-  const totalVentas = ventasPendientes.reduce((sum, v) => sum + v.total, 0);
-
-  const corte = await prisma.corteCaja.create({
-    data: {
-      totalVentas,
-      numeroVentas: ventasPendientes.length,
-      ventas: {
-        connect: ventasPendientes.map(v => ({ id: v.id }))
-      }
-    }
-  });
-
-  revalidatePath('/corte-caja');
-  revalidatePath('/');
-}
-
-export async function obtenerCortesCaja() {
-  return await prisma.corteCaja.findMany({
-    include: { ventas: { include: { items: { include: { producto: true } } } } },
-    orderBy: { fecha: 'desc' }
-  });
-}
-
-export async function obtenerVentasPendientesCorte() {
-  return await prisma.venta.findMany({
-    where: { corteCajaId: null },
-    include: { items: { include: { producto: true } } }
-  });
-}
-
 export async function obtenerProductos() {
   return await prisma.producto.findMany({
     include: { proveedor: true }
@@ -183,5 +146,11 @@ export async function obtenerAsistenciasHoy() {
       }
     },
     include: { empleado: true }
+  });
+}
+
+export async function obtenerVentasPendientesCorte() {
+  return await prisma.venta.findMany({
+    include: { items: { include: { producto: true } } }
   });
 }

@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Producto {
@@ -51,16 +52,6 @@ model Venta {
   total        Float
   items        VentaItem[]
   createdAt    DateTime    @default(now())
-  corteCajaId  Int?
-  corteCaja    CorteCaja?  @relation(fields: [corteCajaId], references: [id])
-}
-
-model CorteCaja {
-  id            Int      @id @default(autoincrement())
-  fecha         DateTime @default(now())
-  totalVentas   Float
-  numeroVentas Int
-  ventas        Venta[]
 }
 
 model VentaItem {
