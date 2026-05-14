@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  nombre    String
+  rol       String   @default("EMPLEADO")
+  createdAt DateTime @default(now())
+}
+
 model Producto {
   id           Int       @id @default(autoincrement())
   nombre       String
@@ -16,18 +25,21 @@ model Producto {
   proveedorId  Int?
   proveedor    Proveedor? @relation(fields: [proveedorId], references: [id])
   ventaItems   VentaItem[]
+  compraItems  CompraItem[]
+  movimientos  MovimientoInventario[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
 
 model Proveedor {
-  id        Int        @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   nombre    String
   contacto  String?
   telefono  String?
   email     String?
   productos Producto[]
-  createdAt DateTime   @default(now())
+  compras   Compra[]
+  createdAt DateTime  @default(now())
 }
 
 model Empleado {
@@ -36,6 +48,7 @@ model Empleado {
   nombre      String
   puesto      String?
   asistencias Asistencia[]
+  ventas      Venta[]
   createdAt   DateTime     @default(now())
 }
 
@@ -48,16 +61,56 @@ model Asistencia {
 }
 
 model Venta {
-  id           Int         @id @default(autoincrement())
-  total        Float
-  items        VentaItem[]
-  createdAt    DateTime    @default(now())
+  id         Int         @id @default(autoincrement())
+  total      Float
+  vendedorId Int?
+  vendedor   Empleado?   @relation(fields: [vendedorId], references: [id])
+  items      VentaItem[]
+  createdAt  DateTime    @default(now())
 }
 
 model VentaItem {
   id         Int      @id @default(autoincrement())
   ventaId    Int
   venta      Venta    @relation(fields: [ventaId], references: [id])
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  cantidad   Int
+  precioUnit Float
+}
+
+model MovimientoInventario {
+  id         Int      @id @default(autoincrement())
+  tipo       String
+  productoId Int
+  producto   Producto @relation(fields: [productoId], references: [id])
+  cantidad   Int
+  motivo     String?
+  createdAt  DateTime @default(now())
+}
+
+model MovimientoCaja {
+  id         Int      @id @default(autoincrement())
+  tipo       String
+  monto      Float
+  concepto   String
+  referencia String?
+  createdAt  DateTime @default(now())
+}
+
+model Compra {
+  id          Int         @id @default(autoincrement())
+  proveedorId Int
+  proveedor   Proveedor   @relation(fields: [proveedorId], references: [id])
+  total       Float
+  items       CompraItem[]
+  createdAt   DateTime    @default(now())
+}
+
+model CompraItem {
+  id         Int      @id @default(autoincrement())
+  compraId   Int
+  compra     Compra   @relation(fields: [compraId], references: [id])
   productoId Int
   producto   Producto @relation(fields: [productoId], references: [id])
   cantidad   Int

@@ -3,15 +3,21 @@
 import { useState } from 'react';
 import { realizarVenta } from '@/lib/actions';
 
-export default function CobroClient({ productos }: { productos: Array<{ id: number; nombre: string; precio: number; stock: number }> }) {
+export default function CobroClient({
+  productos,
+  empleados,
+}: {
+  productos: Array<{ id: number; nombre: string; precio: number; stock: number }>;
+  empleados: Array<{ id: number; nombre: string; codigo: string }>;
+}) {
   const [cart, setCart] = useState<Array<{ productoId: number; nombre: string; cantidad: number; precioUnit: number }>>([]);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [cantidad, setCantidad] = useState(1);
+  const [vendedorId, setVendedorId] = useState('');
 
   const agregarAlCarrito = () => {
     const productoId = parseInt(selectedProduct);
     const producto = productos.find(p => p.id === productoId);
-
     if (!producto || cantidad <= 0) return;
 
     setCart(prev => {
@@ -37,8 +43,10 @@ export default function CobroClient({ productos }: { productos: Array<{ id: numb
 
     const formData = new FormData();
     formData.set('items', JSON.stringify(cart.map(({ productoId, cantidad, precioUnit }) => ({ productoId, cantidad, precioUnit }))));
+    formData.set('vendedorId', vendedorId);
     await realizarVenta(formData);
     setCart([]);
+    setVendedorId('');
   };
 
   return (
@@ -48,6 +56,17 @@ export default function CobroClient({ productos }: { productos: Array<{ id: numb
         <p style={{ color: '#64748b', marginBottom: '1rem' }}>Sistema de cobro y ventas</p>
 
         <div style={{ marginBottom: '1rem' }}>
+          <select
+            value={vendedorId}
+            onChange={e => setVendedorId(e.target.value)}
+            style={{ marginBottom: '1rem', display: 'block', width: '100%', padding: '0.5rem' }}
+          >
+            <option value="">Seleccionar vendedor...</option>
+            {empleados.map(e => (
+              <option key={e.id} value={e.id}>{e.nombre} ({e.codigo})</option>
+            ))}
+          </select>
+
           <select
             value={selectedProduct}
             onChange={e => setSelectedProduct(e.target.value)}

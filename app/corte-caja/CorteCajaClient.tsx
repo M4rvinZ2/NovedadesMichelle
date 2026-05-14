@@ -7,9 +7,11 @@ export default function CorteCajaClient({ ventasPendientesIniciales }: {
     id: number;
     total: number;
     createdAt: Date;
+    vendedor?: { nombre: string; codigo: string } | null;
     items: Array<{
       id: number;
       cantidad: number;
+      precioUnit: number;
       producto: { nombre: string };
     }>;
   }>
@@ -17,8 +19,8 @@ export default function CorteCajaClient({ ventasPendientesIniciales }: {
   const [ventasPendientes, setVentasPendientes] = useState(ventasPendientesIniciales);
   const [expandedVenta, setExpandedVenta] = useState<number | null>(null);
 
-  const totalPendiente = ventasPendientes.reduce((sum: number, v: any) => sum + v.total, 0);
-  const totalItemsPendiente = ventasPendientes.reduce((sum: number, v: any) => sum + v.items.reduce((s: number, i: any) => s + i.cantidad, 0), 0);
+  const totalPendiente = ventasPendientes.reduce((sum, v) => sum + v.total, 0);
+  const totalItemsPendiente = ventasPendientes.reduce((sum, v) => sum + v.items.reduce((s, i) => s + i.cantidad, 0), 0);
 
   return (
     <div>
@@ -52,8 +54,9 @@ export default function CorteCajaClient({ ventasPendientesIniciales }: {
                 <span style={{ fontWeight: 600 }}>Venta #{v.id}</span>
                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)' }}>${v.total.toFixed(2)}</span>
               </div>
-              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                {new Date(v.createdAt).toLocaleString('es-MX')}
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{new Date(v.createdAt).toLocaleString('es-MX')}</span>
+                {v.vendedor && <span>Vendedor: {v.vendedor.nombre}</span>}
               </div>
 
               {expandedVenta === v.id && (
@@ -61,7 +64,7 @@ export default function CorteCajaClient({ ventasPendientesIniciales }: {
                   <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>Productos:</div>
                   {v.items.map(i => (
                     <div key={i.id} style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
-                      {i.producto.nombre} x{i.cantidad} - ${(i.cantidad * (i as any).precioUnit || 0).toFixed(2)}
+                      {i.producto.nombre} x{i.cantidad} - ${(i.cantidad * i.precioUnit).toFixed(2)}
                     </div>
                   ))}
                 </div>
